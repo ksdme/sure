@@ -1,0 +1,4 @@
+"""
+	@author ksdme
+	Contains Utilities
+"""
