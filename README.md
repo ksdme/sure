@@ -1,2 +1,2 @@
-# Sure, Runtime type system
+# Sure
 Built out of necessity
