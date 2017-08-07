@@ -1,2 +1,2 @@
-# Sure, Python Runtime Type System
+# Sure, Runtime type system
 Built out of necessity
