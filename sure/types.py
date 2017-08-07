@@ -6,7 +6,10 @@ from sure.utilities import Consts
 from sure.exceptions import SureTypeError
 
 # global value
-THROWS = True
+class SureConfig:
+    """ holds config values """
+
+    THROWS = True
 
 def u_resolve_fail(throws=False):
     """
@@ -14,67 +17,83 @@ def u_resolve_fail(throws=False):
         fail signal is returned
     """
 
+    if throws is None:
+        throws = SureConfig.THROWS
+
     if throws:
         raise SureTypeError()
     else:
         return Consts.Fail
 
-def u_resolve_digest(base, digest=None):
+def u_resolve_nested(base, nested=None):
     """
         remakes a kiln function to
-        ensure it can be nested
+        ensure it can be nesteded
     """
 
-    if callable(digest):
-        return lambda val: base()(val=digest(val=val))
+    if callable(nested):
+        return lambda val: base()(val=nested(val=val))
     else:
         return False
 
-def u_base_type(condition, typ_func, digest=None, throws=THROWS):
+def u_base_type(condition, typ_func, nested=None, throws=None):
     """
         ensures that the flowing data is
         of type typ
     """
 
-    val = u_resolve_digest(typ_func, digest)
+    val = u_resolve_nested(typ_func, nested)
     if val is not False:
         return val
 
     def _internal(val):
-        if condition(val):
-            u_resolve_fail(throws)
+        if not condition(val):
+            return u_resolve_fail(throws)
         else:
             return val
 
     return _internal
 
-def integer(digest=None, throws=THROWS):
+def const(val):
+    """ simply return a constant val """
+
+    return lambda v: val
+
+def integer(nested=None, throws=None):
     """ ensure it is an int """
 
     condition = lambda val: isinstance(val, int)
-    return u_base_type(condition, integer, digest, throws)
+    return u_base_type(condition, integer, nested, throws)
 
-def floating(digest=None, throws=THROWS):
+def floating(nested=None, throws=None):
     """ ensure it is a float """
 
     condition = lambda val: isinstance(val, float)
-    return u_base_type(condition, floating, digest, throws)
+    return u_base_type(condition, floating, nested, throws)
 
-def string(digest=None, throws=THROWS):
+def string(nested=None, throws=None):
     """ ensure it is a float """
 
     condition = lambda val: isinstance(val, str)
-    return u_base_type(condition, string, digest, throws)
+    return u_base_type(condition, string, nested, throws)
 
-def klass(typ, digest=None, throws=THROWS):
+def klass(typ, nested=None, throws=None):
     """ ensures val is an instance of klass """
 
     condition = lambda val: isinstance(val, typ)
-    recall = lambda digest, throws: klass(typ, digest, throws)
-    return u_base_type(condition, recall, digest, throws)
+    recall = lambda nested, throws: klass(typ, nested, throws)
+    return u_base_type(condition, recall, nested, throws)
 
-def positive(digest=None, throws=THROWS):
+def positive(nested=None, throws=None):
     """ ensure it is a float """
 
-    condition = lambda val: float(val) > 0
-    return u_base_type(condition, positive, digest, throws)
+    def _condition(val):
+        try:
+            if float(val) > 0:
+                return val
+            else:
+                return False
+        except:
+            return False
+
+    return u_base_type(_condition, positive, nested, throws)
