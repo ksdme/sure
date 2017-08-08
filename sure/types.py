@@ -57,7 +57,7 @@ def u_base_type(condition, typ_func, nested=None, throws=None):
 def const(val):
     """ simply return a constant val """
 
-    return lambda v: val
+    return lambda v=None: val
 
 def integer(nested=None, throws=None):
     """ ensure it is an int """
@@ -71,6 +71,7 @@ def floating(nested=None, throws=None):
     condition = lambda val: isinstance(val, float)
     return u_base_type(condition, floating, nested, throws)
 
+#! no test unit for nested behaviour
 def string(nested=None, throws=None):
     """ ensure it is a float """
 
@@ -81,7 +82,7 @@ def klass(typ, nested=None, throws=None):
     """ ensures val is an instance of klass """
 
     condition = lambda val: isinstance(val, typ)
-    recall = lambda nested, throws: klass(typ, nested, throws)
+    recall = lambda nested=None, throws=None: klass(typ, nested, throws)
     return u_base_type(condition, recall, nested, throws)
 
 def positive(nested=None, throws=None):
