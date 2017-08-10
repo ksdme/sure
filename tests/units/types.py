@@ -10,9 +10,6 @@ from sure.exceptions import SureTypeError
 class TestTypeSystem(unittest.TestCase):
     """ TestTypeSystem """
 
-    def setUp(self):
-        SureConfig.THROWS = False
-
     def test_flat_const(self):
         """ checks for the const type filter """
 
