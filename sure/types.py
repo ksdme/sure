@@ -2,28 +2,7 @@
     @author ksdme
     Available type decls
 """
-from sure.utilities import Consts
-from sure.exceptions import SureTypeError
-
-# global value
-class SureConfig:
-    """ holds config values """
-
-    THROWS = True
-
-def u_resolve_fail(throws=False):
-    """
-        decides what to do when a
-        fail signal is returned
-    """
-
-    if throws is None:
-        throws = SureConfig.THROWS
-
-    if throws:
-        raise SureTypeError()
-    else:
-        return Consts.Fail
+from sure.utilities import u_resolve_fail, Consts
 
 def u_resolve_nested(base, nested=None):
     """
@@ -38,8 +17,8 @@ def u_resolve_nested(base, nested=None):
 
 def u_base_type(condition, typ_func, nested=None, throws=None):
     """
-        ensures that the flowing data is
-        of type typ
+        ensures that the flowing data
+        is of type typ
     """
 
     val = u_resolve_nested(typ_func, nested)
