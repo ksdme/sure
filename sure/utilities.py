@@ -2,8 +2,23 @@
     @author ksdme
     Contains Utilities
 """
+from sure.exceptions import SureTypeError
 
-class _DUMB(object):
+def u_resolve_fail(throws=False):
+    """
+        decides what to do when
+        fail signal is returned
+    """
+
+    if throws is None:
+        throws = False
+
+    if throws:
+        raise SureTypeError()
+    else:
+        return Consts.Fail
+
+class ConstantValue(object):
     """ simply used to build refs """
 
     def __str__(self):
@@ -20,21 +35,26 @@ class Consts(object):
     """
 
     # Used only in cases when a test fails
-    Fail = _DUMB("Failed")
+    Fail = ConstantValue("Failed")
 
     # Used to represent bool vals
-    Faalse = _DUMB("False")
-    Truee = _DUMB("True")
+    Truee = ConstantValue("True")
+    Faalse = ConstantValue("False")
 
     @staticmethod
     def bool(val):
+        """
+            boolify into Truee's and Faalse's
+            this helps to reference check
+        """
+
         if val is False:
             return Consts.Faalse
 
         return Consts.Truee
 
     # Pass Signal
-    Pass = _DUMB("Passed")
+    Pass = ConstantValue("Passed")
 
     # Undefined yet
-    Undefined = _DUMB("Undefined")
+    Undefined = ConstantValue("Undefined")
