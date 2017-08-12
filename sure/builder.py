@@ -5,18 +5,10 @@
 """
 from time import time
 from random import randrange
-from sure.utilities import Consts
-from sure.types import u_resolve_fail
-from sure.exceptions import SureTypeError
+from sure.utilities import Consts, u_resolve_fail
+from sure.exceptions import SureTypeError, SureValueError
 
-# simple global config
-class Config:
-
-    # maximum value of a random salt
-    # used during generating val_name
-    MaxSalt = 100000
-
-def gen_prop_getter(val_name, setter):
+def gen_prop_getter(val_name, setter, throws):
     """
         generates a getter function for a class
         propety going by val_name, evals by checking
@@ -29,7 +21,10 @@ def gen_prop_getter(val_name, setter):
         try:
             attr = getattr(self, val_name)
         except AttributeError:
-            return Consts.Undefined
+            if throws:
+                raise SureValueError()
+            else:
+                return Consts.Undefined
 
         if attr is Consts.Undefined:
             try:
@@ -63,11 +58,11 @@ def prop(typ, throws=True):
         generates a random name for the property
         and sets up the setter and getter
     """
-    val_name = str(randrange(Config.MaxSalt))
+    val_name = str(randrange(10000))
     val_name += "{0:.20f}".format(time()).replace(".", "")
     val_name = "_var" + val_name
 
     setter = gen_prop_setter(val_name, typ, throws)
-    getter = gen_prop_getter(val_name, setter)
+    getter = gen_prop_getter(val_name, setter, throws)
 
     return property(getter, setter)

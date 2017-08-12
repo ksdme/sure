@@ -22,7 +22,7 @@ class ConstantValue(object):
     """ simply used to build refs """
 
     def __str__(self):
-        return self.msg
+        return "Const: " + str(self.msg)
 
     def __init__(self, msg):
         self.msg = msg
