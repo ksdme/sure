@@ -18,17 +18,15 @@ def gen_prop_getter(val_name, setter, throws):
     """
 
     def _internal(self):
+        attr = Consts.Undefined
         try:
             attr = getattr(self, val_name)
         except AttributeError:
-            if throws:
-                raise SureValueError()
-            else:
-                return Consts.Undefined
+            setattr(self, val_name, Consts.Undefined)
 
         if attr is Consts.Undefined:
             try:
-                setter(Consts.Undefined)
+                setter(self, Consts.Undefined)
             except SureTypeError:
                 pass
 
