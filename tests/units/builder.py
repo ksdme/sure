@@ -15,7 +15,7 @@ class TestBuilder(TestCase):
 
         class Sample(object):
             name = prop(string())
-            serial = prop(integer(positive()))
+            serial = prop(integer().positive())
 
         sample = Sample()
         sample.name = "@ksdme"

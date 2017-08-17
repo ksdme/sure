@@ -16,6 +16,7 @@ class TestTypeSystem(unittest.TestCase):
         self.assertEqual(const(None)(), None)
         self.assertEqual(const("Hey")(), "Hey")
         self.assertEqual(const(12345)(), 12345)
+
         self.assertTrue(const(Consts.Fail)() is Consts.Fail)
 
     def test_flat_integer(self):
@@ -66,9 +67,9 @@ class TestTypeSystem(unittest.TestCase):
         """ ensure it is a positive number """
 
         typ = positive()
+        self.assertEqual(typ(""), "")
         self.assertEqual(typ(2.5), 2.5)
         self.assertTrue(typ(-1) is Consts.Fail)
-        self.assertTrue(typ("") is Consts.Fail)
 
     def test_flat_array(self):
         """ tests for an array of values """
@@ -78,10 +79,10 @@ class TestTypeSystem(unittest.TestCase):
         self.assertTrue(typ([1, 2, "3"]) is Consts.Fail)
         self.assertEqual(typ([1, 2, 3]), [1, 2, 3])
 
-    def tests_flat_accept_all(self):
+    def tests_flat_accept(self):
         """ accept all """
 
-        typ = accept_all()
+        typ = accept()
         self.assertEqual(typ(1), 1)
         self.assertEqual(typ(None), None)
         self.assertEqual(typ(Consts.Fail), Consts.Fail)
@@ -122,10 +123,21 @@ class TestTypeSystem(unittest.TestCase):
         self.assertTrue(typ("") is Consts.Fail)
         self.assertTrue(typ(-1) is Consts.Fail)
 
+        typ = integer().positive()
+        self.assertEqual(typ(1), 1)
+        self.assertTrue(typ("") is Consts.Fail)
+        self.assertTrue(typ(-1) is Consts.Fail)
+
     def test_nested_floating(self):
         """ simply tests a for nesting consistency """
 
         typ = floating(positive())
+        self.assertEqual(typ(10.0), 10.0)
+        self.assertTrue(typ("") is Consts.Fail)
+        self.assertTrue(typ(10) is Consts.Fail)
+        self.assertTrue(typ(-10.0) is Consts.Fail)
+
+        typ = floating().positive()
         self.assertEqual(typ(10.0), 10.0)
         self.assertTrue(typ("") is Consts.Fail)
         self.assertTrue(typ(10) is Consts.Fail)
@@ -148,9 +160,19 @@ class TestTypeSystem(unittest.TestCase):
         self.assertTrue(typ(10.0) is Consts.Fail)
         self.assertTrue(typ("") is Consts.Fail)
 
+        typ = positive().integer()
+        self.assertEqual(typ(10), 10)
+        self.assertTrue(typ(-10) is Consts.Fail)
+        self.assertTrue(typ(10.0) is Consts.Fail)
+        self.assertTrue(typ("") is Consts.Fail)
+
     def test_nested_array(self):
         """ test array nested """
 
-        typ = array(integer(), accept_all())
+        typ = array(integer(), accept())
+        self.assertEqual(typ([1, 2, 3]), [1, 2, 3])
+        self.assertTrue(typ(1) is Consts.Fail)
+
+        typ = array(integer()).accept()
         self.assertEqual(typ([1, 2, 3]), [1, 2, 3])
         self.assertTrue(typ(1) is Consts.Fail)

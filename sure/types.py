@@ -159,6 +159,26 @@ def bool_and(*args, **kargs):
     return u_condition_checker(frm, _internal)
 
 # ----------------------------------------
+# Extras
+# ----------------------------------------
+def default(typ, default=None, frm=None):
+    """ optional value """
+
+    def _internal(val):
+        if typ(val) is Consts.Fail:
+            return default
+        else:
+            return val
+
+    return u_condition_checker(frm, _internal)
+
+def const(always, frm=None):
+    """ always returns a const value """
+
+    lamda = lambda val=None: always
+    return u_condition_checker(frm, lamda)
+
+# ----------------------------------------
 # Facilitate Fluent Interfacing
 # ----------------------------------------
 class PrimaryTypes(object):
@@ -188,15 +208,6 @@ class DerivedTypes(object):
     def accept(self):
         return accept(self)
 
-class PropertyCheckers(object):
-    """ wraps property checkers """
-
-    def positive(self):
-        return positive(self)
-
-    def length(self, rnge):
-        return length(rnge, self)
-
 class BooleanOps(object):
     """ wraps boolean ops """
 
@@ -206,10 +217,29 @@ class BooleanOps(object):
     def bool_and(self, *args):
         return bool_and(*args, frm=self)
 
+class ExtraUtils(object):
+    """ searches extras """
+
+    def default(self, typ, default=None):
+        return default(typ, default, frm=self)
+
+    def const(self, val):
+        return const(val, frm=self)
+
+class PropertyCheckers(object):
+    """ wraps property checkers """
+
+    def positive(self):
+        return positive(self)
+
+    def length(self, rnge):
+        return length(rnge, self)
+
 class Type(PrimaryTypes,
            DerivedTypes,
            PropertyCheckers,
-           BooleanOps):
+           BooleanOps,
+           ExtraUtils):
     """
         Provides a basic class
         for type
@@ -227,7 +257,7 @@ class Type(PrimaryTypes,
             assert callable(typ)
             self.type_q.append(typ)
 
-    def __call__(self, val):
+    def __call__(self, val=Consts.Faalse):
         """ validates """
 
         for elm in self.type_q:
