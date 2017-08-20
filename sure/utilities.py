@@ -58,3 +58,6 @@ class Consts(object):
 
     # Undefined yet
     Undefined = ConstantValue("Undefined")
+
+    # simple opt flag
+    Opt = ConstantValue("Opt")

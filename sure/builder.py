@@ -6,22 +6,23 @@
 from time import time
 from random import randrange
 from sure.utilities import Consts, u_resolve_fail
-from sure.exceptions import SureTypeError, TypeDefinitionError, SureValueError
+from sure.exceptions import SureTypeError, TypeDefinitionError
+from sure.exceptions import SureValueError, RequiredValueMissing
 
-class StaticModel(object):
+class SureTypedModel(object):
     """
         parent class for all static type
         holders
     """
 
-    def __init__(self, deep=None, **kargs):
+    def __init__(self, deep={}, **kargs):
 
         # set unnested attributes
         for name, val in kargs.iteritems():
             setattr(self, name, val)
 
         # set deep internal stuff
-        for name, val in deep:
+        for name, val in deep.iteritems():
             name, context = name.strip().split("."), self
             for elm in name[:-1]:
                 context = getattr(context, elm)
@@ -156,6 +157,8 @@ def nested_prop(nestd, throws=True):
     for elm, typ in nestd.iteritems():
         if isinstance(typ, property):
             setattr(_InternalStruct, elm, typ)
+        elif isinstance(typ, dict):
+            setattr(_InternalStruct, elm, nested(typ))
         else:
             assert callable(typ), "TypeDefinitionError"
             setattr(_InternalStruct, elm, prop(typ, True))
