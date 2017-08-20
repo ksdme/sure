@@ -3,9 +3,9 @@
     tests the sure.builder module
 """
 from unittest import TestCase
-from sure.exceptions import SureTypeError
 from sure.types import integer, string, positive
-from sure.builder import prop, nested_prop, nested
+from sure.exceptions import SureTypeError, SureValueError
+from sure.builder import prop, nested_prop, nested, SureTypedModel
 
 class TestBuilder(TestCase):
     """ tests builder """
@@ -70,3 +70,33 @@ class TestBuilder(TestCase):
             mine.family.father = {
                 "age": "20"
             }
+
+    def test_nested_constr_builder(self):
+        """ simply test the basic cons builder """
+
+        class Sample(SureTypedModel):
+            serial = prop(integer())
+            name = nested_prop({
+                "first": string(),
+                "last": string(),
+
+                "dob": {
+                    "date": integer().positive(),
+                    "mont": integer(),
+                    "year": integer()
+                }
+            })
+
+        values = {
+            "name.first":   "Kilari",
+            "name.last":    "Teja",
+            "name.dob.date": 10
+        }
+
+        sample = Sample(values, serial=123)
+        self.assertEqual(sample.serial, 123)
+        self.assertEqual(sample.name.first, "Kilari")
+        self.assertEqual(sample.name.dob.date, 10)
+
+        with self.assertRaises(SureValueError):
+            sample.name.dob.mont
