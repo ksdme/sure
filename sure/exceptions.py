@@ -20,3 +20,9 @@ class TypeDefinitionError(Exception):
 
     def __init__(self, msg=""):
         super(TypeDefinitionError, self).__init__(msg)
+
+class RequiredValueMissing(Exception):
+    """ missing a value that is not opt """
+
+    def __init__(self, msg=""):
+        super(RequiredValueMissing, self).__init__(msg)
