@@ -14,3 +14,9 @@ class SureValueError(Exception):
 
     def __init__(self, msg=""):
         super(SureValueError, self).__init__(msg)
+
+class TypeDefinitionError(Exception):
+    """ type error """
+
+    def __init__(self, msg=""):
+        super(TypeDefinitionError, self).__init__(msg)
