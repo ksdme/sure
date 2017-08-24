@@ -3,9 +3,10 @@
     tests the sure.builder module
 """
 from unittest import TestCase
-from sure.types import integer, string, positive
+from sure.types import integer, string, positive, optional
 from sure.builder import prop, nested_prop, nested, TypedModel
-from sure.exceptions import SureTypeError, SureValueError, ModelFreezed
+from sure.exceptions import SureTypeError, SureValueError
+from sure.exceptions import ModelFreezed, RequiredValueMissing
 
 class TestBuilder(TestCase):
     """ tests builder """
@@ -104,5 +105,49 @@ class TestBuilder(TestCase):
         with self.assertRaises(ModelFreezed):
             sample.names = 50
 
-        sample.name.dob.date = 20
+    def test_struct_method(self):
+        """ tests struct method of models """
 
+        class Sample(TypedModel):
+            name = prop(string().length(3))
+            roll = prop(optional(integer().positive()))
+
+        sample = Sample()
+        
+        with self.assertRaises(RequiredValueMissing):
+            sample()
+
+        sample.name = "Teja"
+        self.assertEqual(sample(), { "name": "Teja" })
+
+        sample.roll = 50
+        self.assertEqual(sample(), { "name": "Teja", "roll": 50 })
+
+        # -- nested testing --
+        class Sample2(TypedModel):
+            name = nested_prop({
+                "last": optional(string()),
+                "first": string()
+            })
+
+            roll = prop(integer())
+
+        sample = Sample2(roll=50)
+        
+        with self.assertRaises(RequiredValueMissing):
+            sample()
+
+        sample.name.first = "Hey"
+        self.assertEqual(sample(), {
+            "roll": 50,
+            "name": {
+                "first": "Hey"
+            }})
+
+        sample.name.last = "mate"
+        self.assertEqual(sample(), {
+            "roll": 50,
+            "name": {
+                "first": "Hey",
+                "last": "mate"
+            }})
