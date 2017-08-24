@@ -56,6 +56,25 @@ class TypedModel(object):
     def _freeze(self):
         self.__freezed = True
 
+    def struct(self):
+        """
+            introspects and produce the struct
+            used to json'ify or xml'ify
+        """
+
+        struct_holder = {}
+
+        elms = filter(
+            lambda self: self.find(TypedModel.DYNAMIC_PROPS_PREFIX) != 1, dir(self))
+
+        for elm in elms:
+            prop_val = getattr(self, elm)
+
+            if prop_val:
+                pass
+            else:
+                struct_holder[elm] = prop_val
+
 class _InternalTypedModel(TypedModel):
 
     def __init__(self):
@@ -75,10 +94,9 @@ def _gen_random_name():
 def gen_prop_getter(val_name, setter, throws):
     """
         generates a getter function for a class
-        propety going by val_name, evals by checking
-        if it undefined yet and if it is, tries setting
-        it with an undefined just to see that it aint a
-        opt() type data struct
+        propety going by val_name, it only knows
+        if the value has atleast been set once or
+        if it hasn't been instantiated yet
     """
 
     def _internal(self):
@@ -86,18 +104,8 @@ def gen_prop_getter(val_name, setter, throws):
         try:
             attr = getattr(self, val_name)
         except AttributeError:
-            
-            # set the holder val off to undefined
-            setattr(self, val_name, Consts.Undefined)
-
             if throws:
                 raise SureValueError()
-
-        if attr is Consts.Undefined:
-            try:
-                setter(self, Consts.Undefined)
-            except SureTypeError:
-                raise RequiredValueMissing()
 
         return getattr(self, val_name)
 
