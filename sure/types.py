@@ -1,9 +1,12 @@
 """
     @author ksdme
-    Available type decls
+    Available type decls and the base Type Class
 """
 from sure.utilities import Consts
 from sure.exceptions import SureTypeError
+
+# TODO: find a better way to make type registry
+# with the Type class
 
 def u_condition_checker(frm, cond):
     """
@@ -178,6 +181,14 @@ def const(always, frm=None):
     lamda = lambda val=None: always
     return u_condition_checker(frm, lamda)
 
+def optional(typ, frm=None):
+    """
+        provides optional interfacting,
+        basically an alias for default
+    """
+
+    return default(typ, Consts.Optional, frm)
+
 # ----------------------------------------
 # Facilitate Fluent Interfacing
 # ----------------------------------------
@@ -226,6 +237,9 @@ class ExtraUtils(object):
     def const(self, val):
         return const(val, frm=self)
 
+    def optional(self, val):
+        return optional(val, frm=self)
+
 class PropertyCheckers(object):
     """ wraps property checkers """
 
@@ -257,7 +271,7 @@ class Type(PrimaryTypes,
             assert callable(typ)
             self.type_q.append(typ)
 
-    def __call__(self, val=Consts.Faalse):
+    def __call__(self, val):
         """ validates """
 
         for elm in self.type_q:
