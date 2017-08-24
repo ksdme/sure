@@ -37,27 +37,8 @@ class Consts(object):
     # Used only in cases when a test fails
     Fail = ConstantValue("Failed")
 
-    # Used to represent bool vals
-    Truee = ConstantValue("True")
-    Faalse = ConstantValue("False")
-
-    @staticmethod
-    def bool(val):
-        """
-            boolify into Truee's and Faalse's
-            this helps to reference check
-        """
-
-        if val is False:
-            return Consts.Faalse
-
-        return Consts.Truee
-
-    # Pass Signal
-    Pass = ConstantValue("Passed")
+    # simple optional flag
+    Optional = ConstantValue("Opt")
 
     # Undefined yet
     Undefined = ConstantValue("Undefined")
-
-    # simple opt flag
-    Opt = ConstantValue("Opt")
