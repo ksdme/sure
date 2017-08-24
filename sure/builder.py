@@ -6,14 +6,34 @@
 from time import time
 from random import randrange
 from sure.utilities import Consts, u_resolve_fail
-from sure.exceptions import SureTypeError, TypeDefinitionError
-from sure.exceptions import SureValueError, RequiredValueMissing
+from sure.exceptions import SureTypeError, SureValueError
+from sure.exceptions import ModelFreezed, RequiredValueMissing
 
-class SureTypedModel(object):
+class TypedModel(object):
     """
         parent class for all static type
         holders
     """
+
+    # we need to have some kind of a prefix
+    # to dynamically added variables, so it'll
+    # be __var
+    DYNAMIC_PROPS_PREFIX = "__var"
+
+    # we'll use only the instance's
+    # copy of __freezed though
+    __freezed = False
+
+    def __setattr__(self, key, val):
+
+        if key.find(TypedModel.DYNAMIC_PROPS_PREFIX) != -1 or key in dir(self):
+            object.__setattr__(self, key, val)
+
+        elif self.__freezed:
+            raise ModelFreezed()
+
+        else:
+            object.__setattr__(self, key, val)
 
     def __init__(self, deep={}, **kargs):
 
@@ -29,6 +49,18 @@ class SureTypedModel(object):
 
             setattr(context, name[-1], val)
 
+        # free the hell outta it
+        self._freeze()
+
+    # freezing function
+    def _freeze(self):
+        self.__freezed = True
+
+class _InternalTypedModel(TypedModel):
+
+    def __init__(self):
+        super(_InternalTypedModel, self).__init__()
+
 def _gen_random_name():
     """
         generates random name
@@ -36,7 +68,7 @@ def _gen_random_name():
 
     val_name = str(randrange(10000))
     val_name += "{0:.20f}".format(time()).replace(".", "")
-    val_name = "_var" + val_name
+    val_name = TypedModel.DYNAMIC_PROPS_PREFIX + val_name
 
     return val_name
 
@@ -54,17 +86,18 @@ def gen_prop_getter(val_name, setter, throws):
         try:
             attr = getattr(self, val_name)
         except AttributeError:
-            if throws:
-                raise SureValueError()
-
+            
+            # set the holder val off to undefined
             setattr(self, val_name, Consts.Undefined)
 
+            if throws:
+                raise SureValueError()
 
         if attr is Consts.Undefined:
             try:
                 setter(self, Consts.Undefined)
             except SureTypeError:
-                pass
+                raise RequiredValueMissing()
 
         return getattr(self, val_name)
 
@@ -99,6 +132,7 @@ def prop(typ, throws=True):
 
     return property(getter, setter)
 
+# throws is for consistency
 def gen_nested_prop_getter(val_name, throws, klass):
     """
         generates a nested property getter, it
@@ -151,8 +185,9 @@ def nested_prop(nestd, throws=True):
     assert isinstance(nestd, dict)
     val_name = _gen_random_name()
 
-    # generate a struct class
-    class _InternalStruct(object): pass
+    # generate a internal model class
+    class _InternalStruct(_InternalTypedModel):
+        pass
 
     for elm, typ in nestd.iteritems():
         if isinstance(typ, property):

@@ -4,8 +4,8 @@
 """
 from unittest import TestCase
 from sure.types import integer, string, positive
-from sure.exceptions import SureTypeError, SureValueError
-from sure.builder import prop, nested_prop, nested, SureTypedModel
+from sure.builder import prop, nested_prop, nested, TypedModel
+from sure.exceptions import SureTypeError, SureValueError, ModelFreezed
 
 class TestBuilder(TestCase):
     """ tests builder """
@@ -13,7 +13,7 @@ class TestBuilder(TestCase):
     def test_flat_builder(self):
         """ builder class """
 
-        class Sample(object):
+        class Sample(TypedModel):
             name = prop(string())
             serial = prop(integer().positive())
 
@@ -33,7 +33,7 @@ class TestBuilder(TestCase):
     def test_nested_builder(self):
         """ tests nested builder """
 
-        class Human(object):
+        class Human(TypedModel):
             family = nested_prop({
                 "father": nested({
                     "name": string().length(5),
@@ -74,7 +74,7 @@ class TestBuilder(TestCase):
     def test_nested_constr_builder(self):
         """ simply test the basic cons builder """
 
-        class Sample(SureTypedModel):
+        class Sample(TypedModel):
             serial = prop(integer())
             name = nested_prop({
                 "first": string(),
@@ -85,7 +85,7 @@ class TestBuilder(TestCase):
                     "mont": integer(),
                     "year": integer()
                 }
-            })
+            }, False)
 
         values = {
             "name.first":   "Kilari",
@@ -100,3 +100,9 @@ class TestBuilder(TestCase):
 
         with self.assertRaises(SureValueError):
             sample.name.dob.mont
+
+        with self.assertRaises(ModelFreezed):
+            sample.names = 50
+
+        sample.name.dob.date = 20
+
