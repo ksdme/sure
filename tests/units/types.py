@@ -13,11 +13,11 @@ class TestTypeSystem(unittest.TestCase):
     def test_flat_const(self):
         """ checks for the const type filter """
 
-        self.assertEqual(const(None)(), None)
-        self.assertEqual(const("Hey")(), "Hey")
-        self.assertEqual(const(12345)(), 12345)
+        self.assertEqual(const(None)(None), None)
+        self.assertEqual(const("Hey")(None), "Hey")
+        self.assertEqual(const(12345)(None), 12345)
 
-        self.assertTrue(const(Consts.Fail)() is Consts.Fail)
+        self.assertTrue(const(Consts.Fail)(None) is Consts.Fail)
 
     def test_flat_integer(self):
         """ check type returns and exceptions """
