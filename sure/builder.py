@@ -9,16 +9,16 @@ from sure.utilities import Consts, u_resolve_fail
 from sure.exceptions import SureTypeError, SureValueError
 from sure.exceptions import ModelFreezed, RequiredValueMissing
 
+# we need to have some kind of a prefix
+# to dynamically added variables, so it'll
+# be __var
+DYNAMIC_PROPS_PREFIX = "__var"
+
 class TypedModel(object):
     """
         parent class for all static type
         holders
     """
-
-    # we need to have some kind of a prefix
-    # to dynamically added variables, so it'll
-    # be __var
-    DYNAMIC_PROPS_PREFIX = "__var"
 
     # we'll use only the instance's
     # copy of __freezed though
@@ -26,7 +26,7 @@ class TypedModel(object):
 
     def __setattr__(self, key, val):
 
-        if key.find(TypedModel.DYNAMIC_PROPS_PREFIX) != -1 or key in dir(self):
+        if key.find(DYNAMIC_PROPS_PREFIX) != -1 or key in dir(self):
             object.__setattr__(self, key, val)
 
         elif self.__freezed:
@@ -56,7 +56,7 @@ class TypedModel(object):
     def _freeze(self):
         self.__freezed = True
 
-    def struct(self):
+    def __call__(self):
         """
             introspects and produce the struct
             used to json'ify or xml'ify
@@ -65,15 +65,52 @@ class TypedModel(object):
         struct_holder = {}
 
         elms = filter(
-            lambda self: self.find(TypedModel.DYNAMIC_PROPS_PREFIX) != 1, dir(self))
+            lambda self: not self.startswith("_"), dir(self))
 
+        """
+            this is certainly interesting,
+            you first find all the public attributes via introspection
+            and then 'get' all of them, if any of them raises an ValueErr
+            then it indicates that it wasn't instantiated yet, so its always
+            possible that the one left out was optional field, so it tries to
+            set it to Undefined, Optional fields silently discard the value f
+            it fails and instead give it an optional value, so they have no means
+            of feedback, anyway, it tests in cases of nested stuff and calls the 
+            internal struct holder to submit it struct. Also this thus supports
+            using other TypedModel's as an nested property
+        """
         for elm in elms:
-            prop_val = getattr(self, elm)
+            prop_val = Consts.Undefined
+            
+            try:
+                prop_val = getattr(self, elm)
+            except SureValueError:
 
-            if prop_val:
+                """
+                    test if it is an optional field,
+                    also test it again for its optional'ness
+                    but this time with Const.Optional value
+                """
+                try:
+                    setattr(self, elm, Consts.Undefined)
+                except SureTypeError:
+                    raise RequiredValueMissing()
+
+                continue
+
+            if prop_val is Consts.Optional:
                 pass
+            elif isinstance(prop_val, TypedModel):
+                struct_holder[elm] = prop_val()
             else:
                 struct_holder[elm] = prop_val
+
+        return struct_holder
+
+    def __str__(self):
+        """ alias for __call__ """
+
+        return str(self())
 
 class _InternalTypedModel(TypedModel):
 
@@ -87,7 +124,7 @@ def _gen_random_name():
 
     val_name = str(randrange(10000))
     val_name += "{0:.20f}".format(time()).replace(".", "")
-    val_name = TypedModel.DYNAMIC_PROPS_PREFIX + val_name
+    val_name = DYNAMIC_PROPS_PREFIX + val_name
 
     return val_name
 
@@ -100,9 +137,8 @@ def gen_prop_getter(val_name, setter, throws):
     """
 
     def _internal(self):
-        attr = Consts.Undefined
         try:
-            attr = getattr(self, val_name)
+            getattr(self, val_name)
         except AttributeError:
             if throws:
                 raise SureValueError()
