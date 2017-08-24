@@ -26,3 +26,9 @@ class RequiredValueMissing(Exception):
 
     def __init__(self, msg=""):
         super(RequiredValueMissing, self).__init__(msg)
+
+class ModelFreezed(Exception):
+    """ model has been freezed """
+
+    def __init__(self, msg=""):
+        super(ModelFreezed, self).__init__(msg)
