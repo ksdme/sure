@@ -151,3 +151,16 @@ class TestBuilder(TestCase):
                 "first": "Hey",
                 "last": "mate"
             }})
+
+    def test_nested_alias(self):
+        """ tests prop as alias for neste_prop """
+
+        class Sample(TypedModel):
+            age = prop(integer())
+            name = prop({
+                "first": string(),
+                "last": prop(string())})
+
+        sample = Sample(age=50)
+        sample.name.first = "ksdme"
+        sample.name.last = "teja"
