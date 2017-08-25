@@ -189,11 +189,20 @@ def optional(typ, frm=None):
 
     return default(typ, Consts.Optional, frm)
 
+def func(callble, frm=None):
+    """
+        provides an interface to use a
+        custom function to build the type
+    """
+
+    assert isinstance(callble, callable)
+    return u_condition_checker(frm, callble)
+ 
 # ----------------------------------------
 # Facilitate Fluent Interfacing
 # ----------------------------------------
-class PrimaryTypes(object):
-    """ wraps up the primary types """
+class BuiltInTypes(object):
+    """ wraps up the builtin types """
 
     def integer(self):
         return integer(self)
@@ -210,26 +219,17 @@ class PrimaryTypes(object):
     def null(self):
         return null(self)
 
-class DerivedTypes(object):
-    """ wraps derived types """
-
     def array(self, typ):
         return array(typ, self)
 
     def accept(self):
         return accept(self)
 
-class BooleanOps(object):
-    """ wraps boolean ops """
-
     def bool_or(self, *args):
         return bool_or(*args, frm=self)
 
     def bool_and(self, *args):
         return bool_and(*args, frm=self)
-
-class ExtraUtils(object):
-    """ searches extras """
 
     def default(self, typ, default=None):
         return default(typ, default, frm=self)
@@ -240,20 +240,16 @@ class ExtraUtils(object):
     def optional(self, val):
         return optional(val, frm=self)
 
-class PropertyCheckers(object):
-    """ wraps property checkers """
-
     def positive(self):
         return positive(self)
 
     def length(self, rnge):
         return length(rnge, self)
 
-class Type(PrimaryTypes,
-           DerivedTypes,
-           PropertyCheckers,
-           BooleanOps,
-           ExtraUtils):
+    def func(self, callble):
+        return func(callble, frm=self)
+
+class Type(BuiltInTypes):
     """
         Provides a basic class
         for type
