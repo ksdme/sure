@@ -4,6 +4,7 @@
     actual data type models using types module
 """
 from time import time
+from sure.types import Type
 from random import randrange
 from sure.utilities import Consts, u_resolve_fail
 from sure.exceptions import SureTypeError, SureValueError
@@ -36,6 +37,21 @@ class TypedModel(object):
             object.__setattr__(self, key, val)
 
     def __init__(self, deep={}, **kargs):
+
+        # you can also ignore prop() usage
+        # this part rebuilds vals using props
+        self_class = self.__class__
+        if self_class.__doc__ is not None:
+            self_doc = self_class.__doc__.strip()
+            if self_doc.startswith("@typed"):
+                for elm in dir(self_class):
+                    if elm.startswith("_"):
+                        continue
+
+                    val = getattr(self_class, elm)
+                    if not isinstance(val, property):
+                        if isinstance(val, Type) or isinstance(val, dict):
+                            setattr(self_class, elm, prop(val, True))
 
         # set unnested attributes
         for name, val in kargs.iteritems():

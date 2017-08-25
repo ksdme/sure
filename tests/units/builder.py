@@ -156,10 +156,12 @@ class TestBuilder(TestCase):
         """ tests prop as alias for neste_prop """
 
         class Sample(TypedModel):
-            age = prop(integer())
-            name = prop({
+            """ @typed """
+
+            age = integer()
+            name = {
                 "first": string(),
-                "last": prop(string())})
+                "last": prop(string())}
 
         sample = Sample(age=50)
         sample.name.first = "ksdme"
