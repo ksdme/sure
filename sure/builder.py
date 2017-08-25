@@ -169,6 +169,9 @@ def prop(typ, throws=True):
         generates a random name for the property
         and sets up the setter and getter
     """
+    if isinstance(typ, dict):
+        return nested_prop(typ, throws)
+
     val_name = _gen_random_name()
 
     setter = gen_prop_setter(val_name, typ, throws)
