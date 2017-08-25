@@ -3,10 +3,10 @@
     tests the sure.builder module
 """
 from unittest import TestCase
-from sure.types import integer, string, positive, optional
-from sure.builder import prop, nested_prop, nested, TypedModel
 from sure.exceptions import SureTypeError, SureValueError
-from sure.exceptions import ModelFreezed, RequiredValueMissing
+from sure.types import integer, string, positive, optional, klass
+from sure.builder import prop, nested_prop, nested, TypedModel, TypedValue
+from sure.exceptions import ModelFreezed, RequiredValueMissing, MalformedModel
 
 class TestBuilder(TestCase):
     """ tests builder """
@@ -166,3 +166,34 @@ class TestBuilder(TestCase):
         sample = Sample(age=50)
         sample.name.first = "ksdme"
         sample.name.last = "teja"
+
+    def test_typed_value(self):
+
+        class Sample(TypedValue):
+            """ @typed """
+
+            name = integer()
+            val = string()
+
+        with self.assertRaises(MalformedModel):
+            sample = Sample()
+        
+        class Sample(TypedValue):
+            """ @typed """
+
+            roll = integer()
+
+        sample = Sample(50)
+        self.assertEqual(sample.roll, 50)
+
+        # complex, In class model
+        class Sample2(TypedModel):
+            """ @typed """
+
+            info = klass(Sample)
+
+        sample = Sample2()
+        sample.info = Sample(200)
+
+        self.assertTrue(isinstance(sample.info, Sample))
+        self.assertEqual(sample.info(), 200)

@@ -8,7 +8,7 @@ from sure.types import Type
 from random import randrange
 from sure.utilities import Consts, u_resolve_fail
 from sure.exceptions import SureTypeError, SureValueError
-from sure.exceptions import ModelFreezed, RequiredValueMissing
+from sure.exceptions import ModelFreezed, RequiredValueMissing, MalformedModel
 
 # we need to have some kind of a prefix
 # to dynamically added variables, so it'll
@@ -127,6 +127,25 @@ class TypedModel(object):
         """ alias for __call__ """
 
         return str(self())
+
+class TypedValue(TypedModel):
+
+    def __init__(self, val=None):
+        
+        # ensure only values
+        elms = filter(lambda val: not val.startswith("_"), dir(self))
+        if len(elms) != 1:
+            raise MalformedModel()
+
+        vals = {}
+        if val is not None:
+            vals = {elms[0]: val}
+
+        super(TypedValue, self).__init__(vals)
+
+    def __call__(self):
+        return getattr(self, filter(
+            lambda val: not val.startswith("_"), dir(self))[0])
 
 class _InternalTypedModel(TypedModel):
 
