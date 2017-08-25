@@ -32,3 +32,11 @@ class ModelFreezed(Exception):
 
     def __init__(self, msg=""):
         super(ModelFreezed, self).__init__(msg)
+
+class MalformedModel(Exception):
+    """
+        valued model musn't have multiple attributes
+    """
+
+    def __init__(self, msg=""):
+        super(MalformedModel, self).__init__(msg)
