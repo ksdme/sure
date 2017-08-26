@@ -74,6 +74,26 @@ def array(typ, frm=None):
 
     return u_condition_checker(frm, _internal)
 
+def dictionary(key_typ, val_typ, frm=None):
+    """
+        checks if the dict is consistent
+        with the requierd types
+    """
+
+    def _internal(val):
+        if not isinstance(val, dict):
+            return Consts.Fail
+
+        for key, elm in val.iteritems():
+            if key_typ(key) is Consts.Fail:
+              return Consts.Fail
+            elif val_typ(elm) is Consts.Fail:
+                return Consts.Fail
+
+        return val
+
+    return _internal
+
 def accept(frm=None):
     """ accepts all """
 

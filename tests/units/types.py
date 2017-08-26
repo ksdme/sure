@@ -176,3 +176,13 @@ class TestTypeSystem(unittest.TestCase):
         typ = array(integer()).accept()
         self.assertEqual(typ([1, 2, 3]), [1, 2, 3])
         self.assertTrue(typ(1) is Consts.Fail)
+
+    def test_flat_dictionary(self):
+        """ test dictionary() """
+
+        typ = dictionary(string(), integer())
+        self.assertEqual(typ({ "a": 1 }), { "a": 1 })
+        self.assertEqual(typ({ "a": 1, "b": 2 }), { "a": 1, "b": 2 })
+        self.assertTrue(typ({ 0: 1 }) is Consts.Fail)
+        self.assertTrue(typ([ 0, 1 ]) is Consts.Fail)
+        self.assertTrue(typ({ "0": "1" }) is Consts.Fail)
